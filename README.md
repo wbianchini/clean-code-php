@@ -1,4 +1,4 @@
-# Clean Code PHP
+﻿# Clean Code PHP
 
 ## Table of Contents
 
@@ -14,7 +14,9 @@
      * [Avoid Mental Mapping](#avoid-mental-mapping)
      * [Don't add unneeded context](#dont-add-unneeded-context)
      * [Use default arguments instead of short circuiting or conditionals](#use-default-arguments-instead-of-short-circuiting-or-conditionals)
-  3. [Functions](#functions)
+  3. [Comparison](#comparison)
+     * [Use identical comparison](#use-identical-comparison)
+  4. [Functions](#functions)
      * [Function arguments (2 or fewer ideally)](#function-arguments-2-or-fewer-ideally)
      * [Functions should do one thing](#functions-should-do-one-thing)
      * [Function names should say what they do](#function-names-should-say-what-they-do)
@@ -29,20 +31,21 @@
      * [Avoid type-checking (part 1)](#avoid-type-checking-part-1)
      * [Avoid type-checking (part 2)](#avoid-type-checking-part-2)
      * [Remove dead code](#remove-dead-code)
-  4. [Objects and Data Structures](#objects-and-data-structures)
+  5. [Objects and Data Structures](#objects-and-data-structures)
      * [Use object encapsulation](#use-object-encapsulation)
      * [Make objects have private/protected members](#make-objects-have-privateprotected-members)
-  5. [Classes](#classes)
+  6. [Classes](#classes)
      * [Prefer composition over inheritance](#prefer-composition-over-inheritance)
      * [Avoid fluent interfaces](#avoid-fluent-interfaces)
-  6. [SOLID](#solid)
+     * [Prefer `final` classes](#prefer-final-classes)
+  7. [SOLID](#solid)
      * [Single Responsibility Principle (SRP)](#single-responsibility-principle-srp)
      * [Open/Closed Principle (OCP)](#openclosed-principle-ocp)
      * [Liskov Substitution Principle (LSP)](#liskov-substitution-principle-lsp)
      * [Interface Segregation Principle (ISP)](#interface-segregation-principle-isp)
      * [Dependency Inversion Principle (DIP)](#dependency-inversion-principle-dip)
-  7. [Don’t repeat yourself (DRY)](#dont-repeat-yourself-dry)
-  8. [Translations](#translations)
+  8. [Don’t repeat yourself (DRY)](#dont-repeat-yourself-dry)
+  9. [Translations](#translations)
 
 ## Introduction
 
@@ -55,7 +58,7 @@ Not every principle herein has to be strictly followed, and even fewer will be u
 agreed upon. These are guidelines and nothing more, but they are ones codified over many 
 years of collective experience by the authors of *Clean Code*.
 
-Inspired from [clean-code-javascript](https://github.com/ryanmcdermott/clean-code-javascript)
+Inspired from [clean-code-javascript](https://github.com/ryanmcdermott/clean-code-javascript).
 
 Although many developers still use PHP 5, most of the examples in this article only work with PHP 7.1+.
 
@@ -134,7 +137,7 @@ class User
 {
     const ACCESS_READ = 1;
     const ACCESS_CREATE = 2;
-    const ACCESS_UPDATE = 4;
+    const ACCESS_UPDATE = 4;
     const ACCESS_DELETE = 8;
 }
 
@@ -186,7 +189,7 @@ saveCityZipCode($matches['city'], $matches['zipCode']);
 
 ### Avoid nesting too deeply and return early (part 1)
 
-Too many if else statements can make your code hard to follow. Explicit is better
+Too many if-else statements can make your code hard to follow. Explicit is better
 than implicit.
 
 **Bad:**
@@ -375,7 +378,7 @@ function createMicrobrewery($name = null): void
 
 **Good:**
 
-If you support only PHP 7+, then you can use [type hinting](http://php.net/manual/en/functions.arguments.php#functions.arguments.type-declaration) and be sure that the `$breweryName` will not be `NULL`.
+ You can use [type hinting](http://php.net/manual/en/functions.arguments.php#functions.arguments.type-declaration) and be sure that the `$breweryName` will not be `NULL`.
 
 ```php
 function createMicrobrewery(string $breweryName = 'Hipster Brew Co.'): void
@@ -385,6 +388,44 @@ function createMicrobrewery(string $breweryName = 'Hipster Brew Co.'): void
 ```
 
 **[⬆ back to top](#table-of-contents)**
+
+## Comparison
+
+### Use [identical comparison](http://php.net/manual/en/language.operators.comparison.php)
+
+**Not good:**
+
+The simple comparison will convert the string in an integer.
+
+```php
+$a = '42';
+$b = 42;
+
+if ($a != $b) {
+   // The expression will always pass
+}
+```
+
+The comparison `$a != $b` returns `FALSE` but in fact it's `TRUE`!
+The string `42` is different than the integer `42`.
+
+**Good:**
+
+The identical comparison will compare type and value.
+
+```php
+$a = '42';
+$b = 42;
+
+if ($a !== $b) {
+    // The expression is verified
+}
+```
+
+The comparison `$a !== $b` returns `TRUE`.
+
+**[⬆ back to top](#table-of-contents)**
+
 
 ## Functions
 
@@ -747,7 +788,7 @@ var_dump($newName); // ['Ryan', 'McDermott'];
 
 Polluting globals is a bad practice in many languages because you could clash with another 
 library and the user of your API would be none-the-wiser until they get an exception in 
-production. Let's think about an example: what if you wanted to have configuration array. 
+production. Let's think about an example: what if you wanted to have configuration array?
 You could write global function like `config()`, but it could clash with another library 
 that tried to do the same thing.
 
@@ -1320,10 +1361,10 @@ pattern reduces the verbosity of the code (for example the [PHPUnit Mock Builder
 or the [Doctrine Query Builder](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/query-builder.html)),
 more often it comes at some costs:
 
-1. Breaks [Encapsulation](https://en.wikipedia.org/wiki/Encapsulation_%28object-oriented_programming%29)
-2. Breaks [Decorators](https://en.wikipedia.org/wiki/Decorator_pattern)
-3. Is harder to [mock](https://en.wikipedia.org/wiki/Mock_object) in a test suite
-4. Makes diffs of commits harder to read
+1. Breaks [Encapsulation](https://en.wikipedia.org/wiki/Encapsulation_%28object-oriented_programming%29).
+2. Breaks [Decorators](https://en.wikipedia.org/wiki/Decorator_pattern).
+3. Is harder to [mock](https://en.wikipedia.org/wiki/Mock_object) in a test suite.
+4. Makes diffs of commits harder to read.
 
 For more informations you can read the full [blog post](https://ocramius.github.io/blog/fluent-interfaces-are-evil/)
 on this topic written by [Marco Pivetta](https://github.com/Ocramius).
@@ -1409,6 +1450,74 @@ $car->setColor('pink');
 $car->setMake('Ford');
 $car->setModel('F-150');
 $car->dump();
+```
+
+**[⬆ back to top](#table-of-contents)**
+
+### Prefer final classes
+
+The `final` should be used whenever possible:
+
+1. It prevents uncontrolled inheritance chain.
+2. It encourages [composition](#prefer-composition-over-inheritance).
+3. It encourages the [Single Responsibility Pattern](#single-responsibility-principle-srp).
+4. It encourages developers to use your public methods instead of extending the class to get access on protected ones.
+5. It allows you to change your code without any break of applications that use your class.
+
+The only condition is that your class should implement an interface and no other public methods are defined.
+
+For more informations you can read [the blog post](https://ocramius.github.io/blog/when-to-declare-classes-final/) on this topic written by [Marco Pivetta (Ocramius)](https://ocramius.github.io/).
+
+**Bad:**
+
+```php
+final class Car
+{
+    private $color;
+    
+    public function __construct($color)
+    {
+        $this->color = $color;
+    }
+    
+    /**
+     * @return string The color of the vehicle
+     */
+    public function getColor() 
+    {
+        return $this->color;
+    }
+}
+```
+
+**Good:**
+
+```php
+interface Vehicle
+{
+    /**
+     * @return string The color of the vehicle
+     */
+    public function getColor();
+}
+
+final class Car implements Vehicle
+{
+    private $color;
+    
+    public function __construct($color)
+    {
+        $this->color = $color;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function getColor() 
+    {
+        return $this->color;
+    }
+}
 ```
 
 **[⬆ back to top](#table-of-contents)**
@@ -1637,11 +1746,6 @@ class Rectangle
     protected $width = 0;
     protected $height = 0;
 
-    public function render(int $area): void
-    {
-        // ...
-    }
-
     public function setWidth(int $width): void
     {
         $this->width = $width;
@@ -1671,48 +1775,44 @@ class Square extends Rectangle
     }
 }
 
-/**
- * @param Rectangle[] $rectangles
- */
-function renderLargeRectangles(array $rectangles): void
+function printArea(Rectangle $rectangle): void
 {
-    foreach ($rectangles as $rectangle) {
-        $rectangle->setWidth(4);
-        $rectangle->setHeight(5);
-        $area = $rectangle->getArea(); // BAD: Will return 25 for Square. Should be 20.
-        $rectangle->render($area);
-    }
+    $rectangle->setWidth(4);
+    $rectangle->setHeight(5);
+ 
+    // BAD: Will return 25 for Square. Should be 20.
+    echo sprintf('%s has area %d.', get_class($rectangle), $rectangle->getArea()).PHP_EOL;
 }
 
-$rectangles = [new Rectangle(), new Rectangle(), new Square()];
-renderLargeRectangles($rectangles);
+$rectangles = [new Rectangle(), new Square()];
+
+foreach ($rectangles as $rectangle) {
+    printArea($rectangle);
+}
 ```
 
 **Good:**
 
+The best way is separate the quadrangles and allocation of a more general subtype for both shapes.
+
+Despite the apparent similarity of the square and the rectangle, they are different.
+A square has much in common with a rhombus, and a rectangle with a parallelogram, but they are not subtype.
+A square, a rectangle, a rhombus and a parallelogram are separate shapes with their own properties, albeit similar.
+
 ```php
-abstract class Shape
+interface Shape
 {
-    protected $width = 0;
-    protected $height = 0;
-
-    abstract public function getArea(): int;
-
-    public function render(int $area): void
-    {
-        // ...
-    }
+    public function getArea(): int;
 }
 
-class Rectangle extends Shape
+class Rectangle implements Shape
 {
-    public function setWidth(int $width): void
+    private $width = 0;
+    private $height = 0;
+
+    public function __construct(int $width, int $height)
     {
         $this->width = $width;
-    }
-
-    public function setHeight(int $height): void
-    {
         $this->height = $height;
     }
 
@@ -1722,41 +1822,31 @@ class Rectangle extends Shape
     }
 }
 
-class Square extends Shape
+class Square implements Shape
 {
     private $length = 0;
 
-    public function setLength(int $length): void
+    public function __construct(int $length)
     {
         $this->length = $length;
     }
 
     public function getArea(): int
     {
-        return pow($this->length, 2);
-    }
+        return $this->length ** 2;
+    }
 }
 
-/**
- * @param Rectangle[] $rectangles
- */
-function renderLargeRectangles(array $rectangles): void
+function printArea(Shape $shape): void
 {
-    foreach ($rectangles as $rectangle) {
-        if ($rectangle instanceof Square) {
-            $rectangle->setLength(5);
-        } elseif ($rectangle instanceof Rectangle) {
-            $rectangle->setWidth(4);
-            $rectangle->setHeight(5);
-        }
-
-        $area = $rectangle->getArea(); 
-        $rectangle->render($area);
-    }
+    echo sprintf('%s has area %d.', get_class($shape), $shape->getArea()).PHP_EOL;
 }
 
-$shapes = [new Rectangle(), new Rectangle(), new Square()];
-renderLargeRectangles($shapes);
+$shapes = [new Rectangle(4, 5), new Square(5)];
+
+foreach ($shapes as $shape) {
+    printArea($shape);
+}
 ```
 
 **[⬆ back to top](#table-of-contents)**
@@ -1767,7 +1857,7 @@ ISP states that "Clients should not be forced to depend upon interfaces that
 they do not use." 
 
 A good example to look at that demonstrates this principle is for
-classes that require large settings objects. Not requiring clients to setup
+classes that require large settings objects. Not requiring clients to set up
 huge amounts of options is beneficial, because most of the time they won't need
 all of the settings. Making them optional helps prevent having a "fat interface".
 
@@ -1957,7 +2047,7 @@ tomatoes, onions, garlic, spices, etc. If you have multiple lists that
 you keep this on, then all have to be updated when you serve a dish with
 tomatoes in them. If you only have one list, there's only one place to update!
 
-Oftentimes you have duplicate code because you have two or more slightly
+Often you have duplicate code because you have two or more slightly
 different things, that share a lot in common, but their differences force you
 to have two or more separate functions that do much of the same things. Removing 
 duplicate code means creating an abstraction that can handle this set of different 
@@ -1967,7 +2057,7 @@ Getting the abstraction right is critical, that's why you should follow the
 SOLID principles laid out in the [Classes](#classes) section. Bad abstractions can be
 worse than duplicate code, so be careful! Having said this, if you can make
 a good abstraction, do it! Don't repeat yourself, otherwise you'll find yourself 
-updating multiple places anytime you want to change one thing.
+updating multiple places any time you want to change one thing.
 
 **Bad:**
 
@@ -2048,7 +2138,7 @@ function showList(array $employees): void
 
 This is also available in other languages:
 
-*  :cn: **Chinese:**
+* :cn: **Chinese:**
    * [php-cpm/clean-code-php](https://github.com/php-cpm/clean-code-php)
 * :ru: **Russian:**
    * [peter-gribanov/clean-code-php](https://github.com/peter-gribanov/clean-code-php)
@@ -2059,5 +2149,11 @@ This is also available in other languages:
    * [jeanjar/clean-code-php](https://github.com/jeanjar/clean-code-php/tree/pt-br)
 * :thailand: **Thai:**
    * [panuwizzle/clean-code-php](https://github.com/panuwizzle/clean-code-php)
-
+* :fr: **French:**
+   * [errorname/clean-code-php](https://github.com/errorname/clean-code-php)
+* :vietnam: **Vietnamese**
+   * [viethuongdev/clean-code-php](https://github.com/viethuongdev/clean-code-php)
+* :kr: **Korean:**
+   * [yujineeee/clean-code-php](https://github.com/yujineeee/clean-code-php)
+   
 **[⬆ back to top](#table-of-contents)**
